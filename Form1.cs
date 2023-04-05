@@ -32,6 +32,7 @@ namespace Actividad1_VB
 {
     public partial class Form1 : Form
     {
+        private DataTable vmDataTable;
         public Form1()
         {
             InitializeComponent();
@@ -47,6 +48,26 @@ namespace Actividad1_VB
 
             CheckVBInstall(ref version);
             CheckVBVersion(ref version);
+
+            DataGrid();
+            ListVM();
+
+            datagrid_Sumarry.DataSource = vmDataTable;
+        }
+
+        private void DataGrid()
+        {
+            vmDataTable = new DataTable();
+            vmDataTable.Columns.Add("VM Name");
+            vmDataTable.Columns.Add("OS Type");
+            vmDataTable.Columns.Add("OS Version");
+            vmDataTable.Columns.Add("VM Location");
+            vmDataTable.Columns.Add("RAM");
+            vmDataTable.Columns.Add("Video");
+            vmDataTable.Columns.Add("Graphic Controller");
+            vmDataTable.Columns.Add("Disk GB");
+            vmDataTable.Columns.Add("Disk Format");
+            vmDataTable.Columns.Add("Network Adapter");
         }
 
         private void GetHostIP()
@@ -233,7 +254,342 @@ namespace Actividad1_VB
                 lbl_versionVBText.ForeColor = Color.Orange;
             }
 
+        }
 
+        //ACTIVIDAD 2
+        
+        private void cb_os_type_Click(object sender, EventArgs e)
+        {
+            OS_TYPE_CB();
+        }
+        private void OS_TYPE_CB()
+        {
+            cb_os_type.Items.Clear();
+            cb_os_type.Items.Add("Microsoft Windows");
+            cb_os_type.Items.Add("Linux");
+            cb_os_type.Items.Add("Solaris");
+            cb_os_type.Items.Add("BSD");
+            cb_os_type.Items.Add("IBM OS/2");
+            cb_os_type.Items.Add("MAC OS X");
+            cb_os_type.Items.Add("Other");
+        }
+        private void OS_VERSION_CB()
+        {
+            string os_version = cb_os_type.SelectedItem.ToString();
+
+            if (os_version.Equals("Microsoft Windows"))
+            {
+                WindowsOptionsCB();
+            }
+            if (os_version.Equals("Linux"))
+            {
+                LinuxOptionsCB();
+            }
+        }
+        private void cb_os_version_Click(object sender, EventArgs e)
+        {
+            OS_VERSION_CB();
+        }
+        string savepath;
+        private void OS_Location_CB()
+        {
+            cb_vm_location.Items.Clear();
+            cb_vm_location.Items.Add("Select new Location");
+            if (savepath != null)
+            {
+                cb_vm_location.Text = savepath;
+            }
+
+
+        }
+        private void cb_vm_location_Click(object sender, EventArgs e)
+        {
+            OS_Location_CB();
+        }
+
+        private void cb_vm_location_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // Prepare a dummy string, thos would appear in the dialog
+            if (savepath == null)
+            {
+                using (FolderBrowserDialog sf = new FolderBrowserDialog())
+                {
+
+                    if (sf.ShowDialog() == DialogResult.OK)
+                    {
+                        // Now here's our save folder
+                        savepath = sf.SelectedPath;
+                        cb_vm_location.Items.Clear();
+                        cb_vm_location.Items.Add(savepath);
+                        cb_vm_location.Text = savepath;
+
+                        // Do whatever
+                    }
+                }
+            }
+
+            // Feed the dummy name to the save dialog
+
+        }
+
+        private void WindowsOptionsCB()
+        {
+            cb_os_version.Items.Clear();
+            cb_os_version.Items.Add("Windows 10 (64-bit)");
+            cb_os_version.Items.Add("Windows 11 (64-bit)");
+            cb_os_version.Items.Add("Windows 2022 (64-bit)");
+        }
+        private void LinuxOptionsCB()
+        {
+            cb_os_version.Items.Clear();
+            cb_os_version.Items.Add("Ubuntu (64-bit)");
+            cb_os_version.Items.Add("Antix (64-bit)");
+        }
+        private void btn_create_only_Click(object sender, EventArgs e)
+        {
+            // Variables Name and Operating System
+            string VMsname = tb_vm_name.Text;
+            string OSType = cb_os_type.Text;
+            string OSVersion = cb_os_version.Text;
+            string VMLocation = cb_vm_location.Text;
+            string RAM_label = cb_HARD_ram.Text;
+            string video = cb_HARD_video.Text;
+            string graphic_Serial = cb_HARD_graphic_controller.Text;
+            string donwloaded_medium = "antiX-22-net_386-net.iso";
+            //
+            string VM_GB = textbox_specify_disk_GB.Text;
+            string VM_Format = cb_Specifiy_Disk.Text;
+            //
+            string network_adapter = cb_HARD_network_1stnic.Text;
+            //
+            //
+            string strCmdText1 = "/C" + "\"C:\\Program Files\\Oracle\\virtualbox\\VBoxManage.exe\" createvm --name " + VMsname + " --ostype Ubuntu_64 --register --basefolder " + VMLocation;
+
+            DataRow newRow = vmDataTable.NewRow();
+            newRow["VM Name"] = VMsname;
+            newRow["OS Type"] = OSType;
+            newRow["OS Version"] = OSVersion;
+            newRow["VM Location"] = VMLocation;
+            newRow["RAM"] = RAM_label;
+            newRow["Video"] = video;
+            newRow["Graphic Controller"] = graphic_Serial;
+            newRow["Disk GB"] = VM_GB;
+            newRow["Disk Format"] = VM_Format;
+            newRow["Network Adapter"] = network_adapter;
+            vmDataTable.Rows.Add(newRow);
+
+            Process process1 = new Process();
+            process1.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            process1.StartInfo.FileName = "cmd.exe";
+            process1.StartInfo.Arguments = strCmdText1;
+            process1.StartInfo.UseShellExecute = false;
+            process1.StartInfo.RedirectStandardOutput = true;
+            process1.Start();
+
+            string VBox_Version1 = "";
+            while (!process1.HasExited)
+            {
+                VBox_Version1 = VBox_Version1 + process1.StandardOutput.ReadToEnd();
+            }
+            //
+            process1.Dispose();
+            //
+            if (OSVersion.Equals("Antix (64-bit)"))
+            {
+                //Process process = new Process();
+
+                //process.StartInfo.FileName = @"C:\Program Files\Oracle\VirtualBox\VBoxManage.exe";
+                //process.StartInfo.Arguments = @"storagectl ANTIX --name ""SATA Controller"" --add sata --controller IntelAhci";
+                //process.StartInfo.UseShellExecute = false;
+                //process.StartInfo.RedirectStandardOutput = true;
+                //process.StartInfo.RedirectStandardError = true;
+                //process.Start();
+
+                //string output = process.StandardOutput.ReadToEnd();
+                //string errors = process.StandardError.ReadToEnd();
+
+                //process.WaitForExit();
+                //
+
+                //
+                string strCmdText3 = "/C" + "\"C:\\Program Files\\Oracle\\virtualbox\\VBoxManage.exe\"  modifyvm " + VMsname + " --ioapic on";
+                //
+                string strCmdText4 = "/C" + "\"C:\\Program Files\\Oracle\\virtualbox\\VBoxManage.exe\"  modifyvm " + VMsname + " --memory " + RAM_label + " --vram " + video;
+                //
+                string strCmdText5 = "/C" + "\"C:\\Program Files\\Oracle\\virtualbox\\VBoxManage.exe\"  modifyvm " + VMsname + " --nic1 " + network_adapter.ToLower();
+                //
+                string strCmdText6 = "/C" + "\"C:\\Program Files\\Oracle\\virtualbox\\VBoxManage.exe\"  modifyvm " + VMsname + " --graphicscontroller " + graphic_Serial;
+                //
+                string strCmdText7 = "/C" + "\"C:\\Program Files\\Oracle\\virtualbox\\VBoxManage.exe\"  createmedium disk --filename " + VMLocation + "/" + VMsname + "/" + VMsname + "_DISK." + VM_Format.ToLower() + " --size " + VM_GB + " --format " + VM_Format;
+                //
+                string strCmdTextAntix = "/C" + " cd " + VMLocation + " && curl.exe --url https://ftp.caliu.cat/pub/distribucions/mxlinux/MX-ISOs/ANTIX/Final/antiX-22/antiX-22-net_386-net.iso --output " + donwloaded_medium;
+                //
+                string Full_Location = VMLocation + "/" + VMsname + "/" + VMsname + "_DISK." + VM_Format.ToLower();
+                //
+                string[] array_commands = new string[] {
+                    strCmdText3,
+                    strCmdText4,
+                    strCmdText5,
+                    strCmdText6,
+                    strCmdText7,
+                    strCmdTextAntix,
+                };
+                foreach (string CMD_Arguments in array_commands)
+                {
+                    Process process2 = new Process();
+                    process2.StartInfo.FileName = "cmd.exe";
+                    process2.StartInfo.Arguments = CMD_Arguments;
+                    process2.StartInfo.UseShellExecute = false;
+                    process2.StartInfo.RedirectStandardOutput = true;
+                    process2.Start();
+                    process2.WaitForExit();
+                }
+
+                //
+                //
+                //Process process = new Process();
+
+                //process.StartInfo.FileName = @"C:\Program Files\Oracle\VirtualBox\VBoxManage.exe";
+                //process.StartInfo.Arguments = $"storagectl {VMsname} --name \"SATA Controller\" --add sata --controller IntelAhci";
+                //process.StartInfo.UseShellExecute = false;
+                //process.StartInfo.RedirectStandardOutput = true;
+                //process.StartInfo.RedirectStandardError = true;
+                //process.Start();
+                //process.Dispose();
+                ////
+                //Process process3 = new Process();
+                ////
+                //process3.StartInfo.FileName = @"C:\Program Files\Oracle\VirtualBox\VBoxManage.exe";
+                //process3.StartInfo.Arguments = $"storageattach {VMsname} --storagectl " + "\"SATA Controller\" --port 0 --device 0 --type hdd --medium " + Full_Location;
+                //process3.StartInfo.UseShellExecute = false;
+                //process3.StartInfo.RedirectStandardOutput = true;
+                //process3.StartInfo.RedirectStandardError = true;
+                //process3.Start();
+                //process3.Dispose();
+                ////
+                Process process4 = new Process();
+                //
+
+                process4.StartInfo.FileName = @"C:\Program Files\Oracle\VirtualBox\VBoxManage.exe";
+                process4.StartInfo.Arguments = $"storagectl {VMsname} --name " + "\"IDE Controller\" --add ide --controller PIIX4";
+                process4.StartInfo.UseShellExecute = false;
+                process4.StartInfo.RedirectStandardOutput = true;
+                process4.Start();
+                process4.Dispose();
+                //
+                Process process5 = new Process();
+                //
+                process5.StartInfo.FileName = @"C:\Program Files\Oracle\VirtualBox\VBoxManage.exe";
+                process5.StartInfo.Arguments = $"storageattach {VMsname} --storagectl " + "\"IDE Controller\" --port 1 --device 0 --type dvddrive --medium " + VMLocation + "\\" + donwloaded_medium;
+                process5.StartInfo.UseShellExecute = false;
+                process5.StartInfo.RedirectStandardOutput = true;
+                process5.Start();
+                process5.Dispose();
+                ////
+                //Process process6 = new Process();
+                ////
+                //process6.StartInfo.FileName = @"C:\Program Files\Oracle\VirtualBox\VBoxManage.exe";
+                //process6.StartInfo.Arguments = $"modifyvm {VMsname} --boot1 dvd --boot2 disk --boot3 none --boot4 none";
+                //process6.StartInfo.UseShellExecute = false;
+                //process6.StartInfo.RedirectStandardOutput = true;
+                //process6.StartInfo.RedirectStandardError = true;
+                //process6.Start();
+                //process6.Dispose();
+                ////
+                if (checkBox1.Checked)
+                {
+                    string strCmdText13 = "/C" + "\"C:\\Program Files\\Oracle\\virtualbox\\VBoxManage.exe\" startvm " + VMsname;
+                    Process process10 = new Process();
+                    process10.StartInfo.FileName = "cmd.exe";
+                    process10.StartInfo.Arguments = strCmdText13;
+                    process10.StartInfo.UseShellExecute = false;
+                    process10.StartInfo.RedirectStandardOutput = true;
+                    process10.Start();
+                    process10.Dispose();
+                }
+                // @"storagectl ANTIX --name ""SATA Controller"" --add sata --controller IntelAhci";
+                //
+                //string strCmdText8 = "/C" + @"C:\Program Files\Oracle\virtualbox\VBoxManage.exe" + $"storagectl {VMsname} --name \"SATA Controller\" --add sata --controller IntelAhci";
+                ////
+                //string strCmdText9 = "/C" + @"C:\Program Files\Oracle\virtualbox\VBoxManage.exe" + $"storageattach {VMsname} --storagectl " + "\"SATA Controller\" --port 0 --device 0 --type hdd --medium " + Full_Location;
+                ////
+                //string strCmdText10 = "/C" + @"C:\Program Files\Oracle\virtualbox\VBoxManage.exe" + $"storagectl {VMsname} --name " + "\"IDE Controller\" --add ide --controller PIIX4";
+                ////
+                //string strCmdText11 = "/C" + @"C:\Program Files\Oracle\virtualbox\VBoxManage.exe" + $"storageattach {VMsname} --storagectl " + "\"IDE Controller\" --port 1 --device 0 --type dvddrive --medium " + VMLocation + "\\" +donwloaded_medium;
+                ////
+                //string strCmdText12 = "/C" + @"C:\Program Files\Oracle\virtualbox\VBoxManage.exe" + $"modifyvm {VMsname} --boot1 dvd --boot2 disk --boot3 none --boot4 none";
+                ////
+
+            }
+
+
+
+        }
+        private void radiobtn_VHD_Location_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void radiobtn_ISO_Download_and_Install_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void cb_Specifiy_Disk_Click(object sender, EventArgs e)
+        {
+            cb_Specifiy_Disk.Items.Clear();
+            cb_Specifiy_Disk.Items.Add("VDI");
+            cb_Specifiy_Disk.Items.Add("VHD");
+            cb_Specifiy_Disk.Items.Add("VMDK");
+            cb_Specifiy_Disk.Items.Add("HDD");
+            cb_Specifiy_Disk.Items.Add("QCOW");
+            cb_Specifiy_Disk.Items.Add("QED");
+        }
+
+        private void cb_HARD_graphic_controller_Click(object sender, EventArgs e)
+        {
+            cb_HARD_graphic_controller.Items.Clear();
+            cb_HARD_graphic_controller.Items.Add("VMSVGA");
+
+        }
+
+        private void cb_HARD_network_1stnic_Click(object sender, EventArgs e)
+        {
+            cb_HARD_network_1stnic.Items.Clear();
+            cb_HARD_network_1stnic.Items.Add("NAT");
+            cb_HARD_network_1stnic.Items.Add("NAT Network");
+            cb_HARD_network_1stnic.Items.Add("Bridge Adapter");
+            cb_HARD_network_1stnic.Items.Add("Internal Network");
+            cb_HARD_network_1stnic.Items.Add("Host-Only Adapter");
+            cb_HARD_network_1stnic.Items.Add("Not Connected");
+        }
+
+        private void ListVM()
+        {
+            string listVMlbl = "/C" + "\"C:\\Program Files\\Oracle\\virtualbox\\VBoxManage.exe\" list vms";
+
+            lbl_VMList.Text = "";
+
+            System.Diagnostics.Process VMList = new System.Diagnostics.Process();
+            VMList.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+            VMList.StartInfo.FileName = "cmd.exe";
+            VMList.StartInfo.Arguments = listVMlbl;
+            VMList.StartInfo.UseShellExecute = false;
+            VMList.StartInfo.RedirectStandardOutput = true;
+            VMList.Start();
+
+            string VM_List = "";
+
+            while(!VMList.HasExited)
+            {
+                VM_List = VM_List + VMList.StandardOutput.ReadToEnd();
+            }
+
+            lbl_VMList.Text = VM_List;
         }
     }
 }
